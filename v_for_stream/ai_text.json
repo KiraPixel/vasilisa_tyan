@@ -1,0 +1,20 @@
+{
+    "twitch_message": {
+        "message_1": {
+            "text": "kuasdd",
+            "ai_response": "response",
+            "user": "@kirapixel",
+            "done": "Response"
+        },
+        "message_2": {
+            "text": "lololo",
+            "ai_response": "Ахаха",
+            "user": "KiraPixel",
+            "done": "False"
+        }
+    },
+    "day_fact": {
+        "done": "False",
+        "response": "Аазазаз, держи факт дня"
+    }
+}
