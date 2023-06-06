@@ -1,8 +1,8 @@
 import os
 
 ''' setting '''
-enable_voice = False
-gpt_model = 'theb'
+enable_voice = True
+gpt_model = 'usesless_gen'
 
 ''' ket '''
 yandex_oauth_token = 'y0_AgAAAAAIEA5XAATuwQAAAADi7G46EwJH5Uq_Qj27O9oT40GeUzU0zMo'

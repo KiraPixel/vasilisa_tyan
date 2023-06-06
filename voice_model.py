@@ -1,7 +1,6 @@
 import pyaudio
 from speechkit import Session, SpeechSynthesis
 import os
-
 import config
 
 # default audio rate
@@ -37,9 +36,11 @@ def play_audio(audio_data, num_channels=1,
 
 def yandex_tts(response):
     # получаем и записываем respone в текстовой файл для вывода в obs
+    print('AI VOICE: ' + response)
     script_dir = os.path.dirname(os.path.abspath(__file__))
     text_path = os.path.join(script_dir, 'v_for_stream', 'response_vasilis.txt')
     os.makedirs(os.path.dirname(text_path), exist_ok=True)
+    # Wrap the response text to multiple lines
     with open(text_path, 'w', encoding='utf-8') as file:
         file.write(response)
 
@@ -47,7 +48,9 @@ def yandex_tts(response):
         # синтезируем голос в speechkit
         audio_data = synthesizeAudio.synthesize_stream(
             text=response,
-            voice='oksana', format='lpcm', sampleRateHertz=sample_rate
+            voice='alena',
+            format='lpcm',
+            sampleRateHertz=sample_rate
         )
 
         # Воспроизводим синтезированный файл если в конфиге стоит true

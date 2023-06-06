@@ -1,6 +1,5 @@
 import time
 import os
-import json
 import threading
 
 import chat_gpt_model
@@ -8,6 +7,7 @@ import config
 from twitch_model import Bot
 import voice_model
 import asyncio
+from ai_respone import twitch_message_1, twitch_message_2, day_fact_message
 
 
 ''' Ранеры. '''
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     def do_something():
         loop = asyncio.get_event_loop()
         ''' задаем всякое первичное '''
-        day_fact_interval = 60
+        day_fact_interval = 10
         interval = 3  # Интервал времени в секундах
         start_time = time.time()
         while True:
@@ -66,42 +66,34 @@ if __name__ == '__main__':
                 time.sleep(interval)
 
             elapsed_time = time.time() - start_time
-            print(elapsed_time)
-            with open(config.ai_text_json, 'r', encoding='utf-8') as f:  # открыли файл с данными
-                ai_text = json.load(f)  # загнали все, что получилось в переменную
-                twitch_message_json = ai_text['twitch_message']
-                day_fact_json = ai_text['day_fact']
-                ''' проверяем на факт дня '''
-                if day_fact_json['done'] == 'true':
-                    print('запросила новый факт дня')
-                    ''' доработать тут нужно запросить новый day_fact_json '''
-                    start_time = day_fact_interval
-                    skip()
-                    continue
-                if elapsed_time >= day_fact_interval:  # если прошло 60 секунд, ебашим факт дня
-                    ''' доработать тут нужно вызвать озвучение '''
-                    print('выдала новый факт дня')
-                    start_time = day_fact_interval  # Сбросить начальное время
-                ''' проверяем, что ответы пользователей имеют ответ '''
-                if twitch_message_json["message_1"]["done"] == "False":
-                    if twitch_message_json["message_1"]["ai_response"] == "":
-                        #run_chat_dpt_model("twitch_message", "message_1")  # отправляем в GPT
-                        print('запросила ответ на сообщение с твича')
-                    else:
-                        # озвучим
-                        print('Озвучила сообщение с твича 1')
-                        skip()
-                        continue
-                    if twitch_message_json["message_2"]["done"] == "False":
-                        if twitch_message_json["message_2"]["ai_response"] == "":
-                            print('запросила ответ на сообщение с твича 2')
-                            run_chat_dpt_model("twitch_message", "message_2")  # отправляем в GPT
-                        else:
-                            # озвучим
-                            print('Озвучила сообщение с твича 2')
-                            skip()
-                            continue
-            skip()
+            print(f'el_time = {elapsed_time} day_time = {day_fact_interval}' )
+            if day_fact_message.done and not day_fact_message.await_response:
+                chat_gpt_model.generate_text('day_fact', day_fact_message)
+                start_time = time.time()
+                skip()
+                continue
+            elif day_fact_message.await_response:
+                start_time = time.time()
+            elif day_fact_message.ai_done and elapsed_time >= day_fact_interval:
+                voice_model.yandex_tts(day_fact_message.text)
+                day_fact_message.ready()
+                start_time = time.time()
+
+            if not twitch_message_1.done:
+                if twitch_message_1.ai_response is None and not twitch_message_1.await_response:
+                    chat_gpt_model.generate_text('twitch', twitch_message_1)
+                elif twitch_message_1.ai_response is not None:
+                    voice_model.yandex_tts(twitch_message_1.ai_response)
+                    twitch_message_1.message_complete()
+            if not twitch_message_2.done:
+                if twitch_message_2.ai_response is None and not twitch_message_2.await_response:
+                    chat_gpt_model.generate_text('twitch', twitch_message_2)
+                elif twitch_message_2.ai_response is not None:
+                    voice_model.yandex_tts(twitch_message_2.ai_response)
+                    twitch_message_2.message_complete()
+
+
+
 
 
     # Создание событийного цикла (event loop)

@@ -1,29 +1,8 @@
 from twitchio.ext import commands
-import json
 import config
+from ai_respone import twitch_message_1, twitch_message_2
 
 token = config.twitch_token
-
-
-def add_message_to_json(text, user):
-    with open(config.ai_text_json, 'r', encoding='utf-8') as f:  # открыли файл с данными
-        data = json.load(f)
-
-    for message_num, message_data in data['twitch_message'].items():
-        if message_data['done'] != 'True':
-            continue
-
-        new_message = {
-            "text": text,
-            "ai_response": "response",
-            "user": "@" + user,
-            "done": "Response"
-        }
-        data['twitch_message'][message_num] = new_message
-        break
-
-    with open(config.ai_text_json, 'w', encoding='utf-8') as f:  # открыли файл с данными
-        json.dump(data, f, ensure_ascii=False, indent=4)
 
 
 class Bot(commands.Bot):
@@ -37,9 +16,12 @@ class Bot(commands.Bot):
     async def event_message(self, message):
         if message.echo:
             return
-        add_message_to_json(message.content, message.author.name)
-        return
+        if twitch_message_1.done:
+            twitch_message_1.new_message(message.content, message.author.name)
+            print(1)
+        elif twitch_message_2.done:
+            twitch_message_2.new_message(message.content, message.author.name)
+            print(2)
 
-
-# bot = Bot()
-# bot.run()
+#bot = Bot()
+#bot.run()
